@@ -1,6 +1,6 @@
 # Contextual News Search APIs: A Deep Comparison for AI, RAG, and Research
 
-_Last reviewed: August 21, 2026_
+_Last reviewed: August 21, 2026 (Firecrawl entries added October 9, 2026)_
 
 ## Executive summary
 
@@ -28,6 +28,7 @@ This comparison covers:
 - **[Valyu Search API](https://www.valyu.ai/)**
 - **[Perplexity Search API](https://docs.perplexity.ai/docs/search/quickstart)**
 - **[Parallel Search API](https://parallel.ai/products/search)**
+- **[Firecrawl Search API](https://docs.firecrawl.dev/features/search)**
 
 The short version:
 
@@ -38,6 +39,7 @@ The short version:
 - **Tavily** is designed around AI retrieval and returns semantically relevant chunks, but its news mode has a thinner news-specific data model.
 - **Valyu** has useful retrieval controls that many competitors lack, including relevance thresholds, source biasing, and natural-language ranking instructions.
 - **Perplexity** and **Parallel** are strong general AI/web retrieval APIs, but neither exposes a dedicated structured news corpus in the same sense as Webz.io or Brave.
+- **Firecrawl** is a general web-search API for AI agents with a `news` source and optional full-page content per result, but no structured news data model.
 
 ---
 
@@ -69,30 +71,30 @@ The strongest contextual-news API combines **semantic intent** with **database-l
 
 # 1. At-a-glance comparison
 
-| Capability | [Webz.io](https://webz.io/products/news-search-api/) | [Exa](https://exa.ai/docs/reference/verticals/news) | [Brave](https://brave.com/search/api/) | [You.com](https://you.com/docs/guides/search) | [Tavily](https://www.tavily.com/) | [Valyu](https://www.valyu.ai/) | [Perplexity](https://docs.perplexity.ai/docs/search/quickstart) | [Parallel](https://parallel.ai/products/search) |
-|---|---|---|---|---|---|---|---|---|
-| Dedicated news corpus / endpoint | **Yes** | News vertical/category | **Yes** | News section selected by query classifier | News topic/mode | News search type | No dedicated news endpoint | No dedicated news endpoint |
-| Natural-language query | **Yes** | **Yes** | Yes, search-style query | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** |
-| Semantic retrieval explicitly documented | **Yes** | **Yes** | Not explicitly for News API | Query-aware AI retrieval; implementation not fully exposed | Semantic chunks documented | Semantic/AI retrieval documented | Ranking implementation not fully exposed | Semantic objective + web search |
-| Lexical / keyword component | **BM25** | Proprietary | Search operators / lexical query support | Proprietary | Proprietary | Can bypass rewriting/reranking in fast mode | Proprietary | Explicit short search queries plus semantic objective |
-| Hybrid semantic + lexical ranking | **Yes** | Not fully specified publicly | Not documented as hybrid | Not specified publicly | Not specified publicly | Not specified publicly | Not specified publicly | Objective + lexical queries, but implementation differs from BM25 hybrid ranking |
-| Sentiment filter | **Yes** | No dedicated news sentiment filter | No | No | No | No | No | No |
-| News category filter | **Yes** | Generic content category including news | No comparable topical taxonomy in News API | No comparable structured news category filter | Topic selects `news`, not an article taxonomy | No comparable news taxonomy | No | No |
-| Source-country filter | **Yes** | User-location hint, not equivalent | **Yes** | Country geo focus | Country boost only for `general`, not `news` | Country code geo targeting | **Yes** | Geo/source controls, not a news-source-country field |
-| Language filter | **Yes** | Not a primary news-specific filter in the cited News interface | **Yes** | **Yes** | Search parameters vary by mode | Via search behavior/source selection | **Yes, up to 20** | Not a news-specific language taxonomy |
-| Date range | From-date in current Context API | **From + to** | **Freshness + custom range** | **Freshness + custom range** | **From + to / time range** | **From + to** | **Published + updated before/after; recency** | `after_date` |
-| Include/exclude domains | **Yes** | **Yes, large lists** | `site:` plus Goggles/custom ranking | **Yes** | **Yes** | **Yes** | **Yes, limited list** | **Yes** |
-| Domain boosting / demotion | Not in current Context API | Can guide ranking with system prompt | **Yes via Goggles** | **Yes, boost_domains** | Not equivalent | **Yes, source_biases** | No comparable boost control | Can steer source preference in objective |
-| Relevance score returned | Not currently exposed | Highlight-level scores | Not documented | Not exposed as a simple article score | **Yes** | **Yes** | Not exposed as a simple article score | Results ordered by relevance |
-| Minimum relevance threshold | No | No direct article threshold | No | No | No direct threshold | **Yes** | No | No |
-| Query-aware passage/chunk | **Yes** | **Yes** | Additional snippets, not documented as semantic chunks | **Yes: highlights** | **Yes** | Extracted content / reranked results | Extracted snippets/content | **Yes: LLM-optimized excerpts** |
-| Multiple relevant chunks per URL | Current response exposes one best chunk | **Yes** | Up to 5 extra snippets | **Yes** | **Up to 3 chunks/source** | Content length is configurable rather than chunk-count-centric | Content controlled by context/token settings | Excerpts controlled by character budget |
-| Full page/article in same search request | No; current docs use a follow-up News API lookup for full article | **Yes** | No full article contract | **Yes, optional** | **Optional raw content** | Can return large extracted content | Can return substantial extracted content | Excerpts, not positioned as full-page news delivery |
-| Public max results | **50** | **100** | **50/page** | **100 per section** | **20** | **20 normally; higher by request** | **20** | Mode/configuration dependent |
-| Explicit contextual-news history | **30 days in current Context API** | No fixed public news-archive guarantee | Historical/custom-date search, depth not guaranteed | Historical date filters, depth not guaranteed | No fixed news archive guarantee | No fixed news archive guarantee | No fixed news archive guarantee | No fixed news archive guarantee |
-| News-specific structured metadata | **Strong** | Limited compared with a news database | Basic search-result metadata | Basic news/web result metadata | Limited | Limited | Limited | Limited |
-| Recurring free usage | **$5 credit every month** | **$10 credit every month** | **$5 credit every month** | No recurring allowance documented; $100 signup credit | **1,000 credits/month** | No recurring free allowance documented; $10 signup credit | No recurring Search API allowance documented | **$5 monthly credit advertised; up to 5K free requests/month also advertised** |
-| PAYG / no long-term commitment | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** |
+| Capability | [Webz.io](https://webz.io/products/news-search-api/) | [Exa](https://exa.ai/docs/reference/verticals/news) | [Brave](https://brave.com/search/api/) | [You.com](https://you.com/docs/guides/search) | [Tavily](https://www.tavily.com/) | [Valyu](https://www.valyu.ai/) | [Perplexity](https://docs.perplexity.ai/docs/search/quickstart) | [Parallel](https://parallel.ai/products/search) | [Firecrawl](https://docs.firecrawl.dev/features/search) |
+|---|---|---|---|---|---|---|---|---|---|
+| Dedicated news corpus / endpoint | **Yes** | News vertical/category | **Yes** | News section selected by query classifier | News topic/mode | News search type | No dedicated news endpoint | No dedicated news endpoint | `news` search source |
+| Natural-language query | **Yes** | **Yes** | Yes, search-style query | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | Yes, search-style query |
+| Semantic retrieval explicitly documented | **Yes** | **Yes** | Not explicitly for News API | Query-aware AI retrieval; implementation not fully exposed | Semantic chunks documented | Semantic/AI retrieval documented | Ranking implementation not fully exposed | Semantic objective + web search | Not documented |
+| Lexical / keyword component | **BM25** | Proprietary | Search operators / lexical query support | Proprietary | Proprietary | Can bypass rewriting/reranking in fast mode | Proprietary | Explicit short search queries plus semantic objective | Query operators; ranking not documented |
+| Hybrid semantic + lexical ranking | **Yes** | Not fully specified publicly | Not documented as hybrid | Not specified publicly | Not specified publicly | Not specified publicly | Not specified publicly | Objective + lexical queries, but implementation differs from BM25 hybrid ranking | Not specified publicly |
+| Sentiment filter | **Yes** | No dedicated news sentiment filter | No | No | No | No | No | No | No |
+| News category filter | **Yes** | Generic content category including news | No comparable topical taxonomy in News API | No comparable structured news category filter | Topic selects `news`, not an article taxonomy | No comparable news taxonomy | No | No | No news taxonomy |
+| Source-country filter | **Yes** | User-location hint, not equivalent | **Yes** | Country geo focus | Country boost only for `general`, not `news` | Country code geo targeting | **Yes** | Geo/source controls, not a news-source-country field | `location` geo-targeting only |
+| Language filter | **Yes** | Not a primary news-specific filter in the cited News interface | **Yes** | **Yes** | Search parameters vary by mode | Via search behavior/source selection | **Yes, up to 20** | Not a news-specific language taxonomy | No dedicated language parameter |
+| Date range | From-date in current Context API | **From + to** | **Freshness + custom range** | **Freshness + custom range** | **From + to / time range** | **From + to** | **Published + updated before/after; recency** | `after_date` | `tbs`; docs say it does not filter news |
+| Include/exclude domains | **Yes** | **Yes, large lists** | `site:` plus Goggles/custom ranking | **Yes** | **Yes** | **Yes** | **Yes, limited list** | **Yes** | Via `site:`; not documented for news |
+| Domain boosting / demotion | Not in current Context API | Can guide ranking with system prompt | **Yes via Goggles** | **Yes, boost_domains** | Not equivalent | **Yes, source_biases** | No comparable boost control | Can steer source preference in objective | No |
+| Relevance score returned | Not currently exposed | Highlight-level scores | Not documented | Not exposed as a simple article score | **Yes** | **Yes** | Not exposed as a simple article score | Results ordered by relevance | Not exposed; results carry `position` |
+| Minimum relevance threshold | No | No direct article threshold | No | No | No direct threshold | **Yes** | No | No | No |
+| Query-aware passage/chunk | **Yes** | **Yes** | Additional snippets, not documented as semantic chunks | **Yes: highlights** | **Yes** | Extracted content / reranked results | Extracted snippets/content | **Yes: LLM-optimized excerpts** | **Yes: highlights, on by default** |
+| Multiple relevant chunks per URL | Current response exposes one best chunk | **Yes** | Up to 5 extra snippets | **Yes** | **Up to 3 chunks/source** | Content length is configurable rather than chunk-count-centric | Content controlled by context/token settings | Excerpts controlled by character budget | Highlights per result; count not documented |
+| Full page/article in same search request | No; current docs use a follow-up News API lookup for full article | **Yes** | No full article contract | **Yes, optional** | **Optional raw content** | Can return large extracted content | Can return substantial extracted content | Excerpts, not positioned as full-page news delivery | **Yes, optional markdown/HTML via `scrapeOptions`** |
+| Public max results | **50** | **100** | **50/page** | **100 per section** | **20** | **20 normally; higher by request** | **20** | Mode/configuration dependent | **100 per source type** |
+| Explicit contextual-news history | **30 days in current Context API** | No fixed public news-archive guarantee | Historical/custom-date search, depth not guaranteed | Historical date filters, depth not guaranteed | No fixed news archive guarantee | No fixed news archive guarantee | No fixed news archive guarantee | No fixed news archive guarantee | No documented historical depth |
+| News-specific structured metadata | **Strong** | Limited compared with a news database | Basic search-result metadata | Basic news/web result metadata | Limited | Limited | Limited | Limited | Basic search-result metadata |
+| Recurring free usage | **$5 credit every month** | **$10 credit every month** | **$5 credit every month** | No recurring allowance documented; $100 signup credit | **1,000 credits/month** | No recurring free allowance documented; $10 signup credit | No recurring Search API allowance documented | **$5 monthly credit advertised; up to 5K free requests/month also advertised** | **1,000 credits/month** |
+| PAYG / no long-term commitment | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** | Paid plan needed for PAYG |
 
 ### Important qualification
 
@@ -308,6 +310,35 @@ Sources:
 
 ---
 
+## Firecrawl Search API
+
+Firecrawl Search is a general web-search API for AI agents. Setting:
+
+```json
+{"sources": ["news"]}
+```
+
+returns a separate `news` array of articles. News is a source on the search endpoint rather than a separate news database, and the public documentation does not describe a semantic retrieval contract or the ranking architecture.
+
+It supports:
+
+- up to 100 results per source type;
+- `tbs` time presets (past hour to past year), a custom date range, and sort by date; the docs say `tbs` does not filter news results;
+- `location` and `country` geo-targeting;
+- query-relevant highlights, on by default;
+- optional full-page markdown for each result through `scrapeOptions`.
+
+**Why this matters:** news results and the full page content of each result can be returned in the same request.
+
+**Where it differs from Webz.io:** results carry basic metadata (title, display date, image, and a snippet when available) with no sentiment, category, or source-country fields; the `date` field is a display string such as "3 months ago"; and domain filters are documented as `site:` operators but not documented for the news source.
+
+Sources:
+- https://docs.firecrawl.dev/features/search
+- https://docs.firecrawl.dev/features/search-highlights
+- https://docs.firecrawl.dev/api-reference/endpoint/search
+
+---
+
 # 3. Semantic search versus deterministic filtering
 
 This is one of the largest product differences in the market.
@@ -392,6 +423,10 @@ Very good freshness/date/language/domain controls. Weak on news-specific metadat
 
 Good source-policy controls and natural-language objectives, but it does not expose a structured news-filtering model.
 
+### Firecrawl
+
+Geo-targeting through `location`; the docs say the `tbs` time filter does not filter news results. Domain filters are documented as `site:` operators and are not documented for the news source. It does not expose news sentiment, category, or source-country filters.
+
 ---
 
 # 4. Result payloads and RAG readiness
@@ -467,6 +502,12 @@ Perplexity can return extracted content under configurable context/token budgets
 
 Parallel returns compact, LLM-oriented excerpts and allows control of total excerpt characters. It is optimized around keeping the result payload useful to an agent.
 
+## Firecrawl
+
+Firecrawl news results return title, URL, display date, image URL, position, and a snippet when available. Query-relevant highlights are on by default. With `scrapeOptions`, each result also carries the full page content as markdown plus page metadata, at one extra credit per scraped page.
+
+This gives an LLM complete pages rather than snippets, at the cost of a larger payload.
+
 ---
 
 # 5. Relevance controls
@@ -481,6 +522,7 @@ Parallel returns compact, LLM-oriented excerpts and allows control of total exce
 | **Valyu** | **Yes** | Search/reranking oriented | **Yes** | **Yes** | **Yes** |
 | **Perplexity** | No simple score exposed | No | No | No | No comparable boost field |
 | **Parallel** | Ordered by relevance | Not exposed as a simple score | No | **Yes, through objective** | Can steer source preference; also include/exclude |
+| **Firecrawl** | Not exposed; results carry `position` | No | No | No | No |
 
 ### Most useful ideas in this category
 
@@ -535,7 +577,7 @@ Exa is strong at retrieval and content extraction but exposes a more general sea
 
 Brave has country/language/freshness controls and a dedicated News endpoint, but it does not expose a comparable structured news-intelligence schema in the cited endpoint documentation.
 
-## You.com, Tavily, Valyu, Perplexity, Parallel
+## You.com, Tavily, Valyu, Perplexity, Parallel, Firecrawl
 
 These APIs are primarily optimized around finding and extracting useful web/news context. Their public search interfaces are less focused on rich structured article enrichment.
 
@@ -571,6 +613,7 @@ Historical depth is difficult to compare because several vendors do not publish 
 | **Valyu** | start/end date | No fixed news archive guarantee stated |
 | **Perplexity** | published/updated before/after + recency | No fixed news archive guarantee stated |
 | **Parallel** | `after_date` | No fixed news archive guarantee stated |
+| **Firecrawl** | `tbs` presets, custom range, sort by date; the docs say `tbs` does not filter news results | No documented historical depth |
 
 ### Webz.io's current tradeoff
 
@@ -592,6 +635,7 @@ Webz.io's broader data platform has much deeper historical news coverage, so ext
 | **Valyu** | **20 normally**, higher limits by request |
 | **Perplexity** | **20** |
 | **Parallel** | Depends on mode/request; public pricing is commonly framed around 10-result searches |
+| **Firecrawl** | **100 per source type** (`web`, `news`, `images`) |
 
 Large result counts are not automatically better. For RAG, ten high-quality passages may be more useful than 100 URLs. For monitoring, discovery, or corpus-building, larger result windows are much more important.
 
@@ -613,6 +657,7 @@ Technical features are only part of the decision. Developers also care about whe
 | **Valyu** | **$10 one-time signup credit** | Variable, source-dependent retrieval pricing | PAYG available | Public pricing lists roughly $0.50-$30 CPM depending on source |
 | **Perplexity** | No recurring Search API free allowance documented on the pricing page reviewed | **$5/1K successful Search API requests** | PAYG | Up to five query strings can be included in one billed request |
 | **Parallel** | **Recurring free-credit/free-request offers advertised** | **About $0.001-$0.005/request for 10-result Search** | PAYG | Among the lowest-cost general AI-search options |
+| **Firecrawl** | **1,000 credits every month** (~500 ten-result searches), no card required | **2 credits per 10 results**; $5 buys 1,000 to 2,500 credits on Hobby to Growth (5,000 on Scale) | PAYG needs a paid plan; plans bill monthly or yearly (Hobby $19/month, or $16/month billed yearly) | Full-page markdown adds 1 credit per scraped result (basic scrape) |
 
 Sources:
 - Webz.io: https://webz.io/pricing/
@@ -623,6 +668,7 @@ Sources:
 - Valyu: https://www.valyu.ai/pricing
 - Perplexity: https://docs.perplexity.ai/docs/getting-started/pricing
 - Parallel: https://parallel.ai/pricing
+- Firecrawl: https://www.firecrawl.dev/pricing
 
 ---
 
@@ -632,11 +678,13 @@ Pricing is not perfectly apples-to-apples because vendors return different paylo
 
 ## Approximate cost for 1,000 searches
 
-| Results requested / returned | Webz.io | Exa | Brave | You.com | Tavily Basic | Tavily Advanced | Perplexity | Parallel | Valyu |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 10 | **$6** | **$7** | **$5** | **$5** | **$8** | **$16** | **$5** | **~$1-$5** | Variable |
-| 20 | **$11** | **$17** | **$5** | **$5** | **$8** | **$16** | **$5** | Not directly normalized from public 10-result pricing | Variable |
-| 50 | **$26** | **$47** | **$5** | **$5** | Not supported | Not supported | Not supported | Not directly normalized | Normally above public default limit |
+| Results requested / returned | Webz.io | Exa | Brave | You.com | Tavily Basic | Tavily Advanced | Perplexity | Parallel | Valyu | Firecrawl |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10 | **$6** | **$7** | **$5** | **$5** | **$8** | **$16** | **$5** | **~$1-$5** | Variable | **~$4-$10 + plan** |
+| 20 | **$11** | **$17** | **$5** | **$5** | **$8** | **$16** | **$5** | Not directly normalized from public 10-result pricing | Variable | **~$8-$20 + plan** |
+| 50 | **$26** | **$47** | **$5** | **$5** | Not supported | Not supported | Not supported | Not directly normalized | Normally above public default limit | **~$20-$50 + plan** |
+
+Firecrawl ranges use its pay-as-you-go rates on Hobby to Growth, from $5 per 1,000 credits to $5 per 2,500 credits, at 2 credits per 10 results. Pay-as-you-go needs a paid plan, whose fee is not included.
 
 ### How Webz.io's calculation works
 
@@ -705,12 +753,13 @@ Recurring free usage can matter more than a large one-time signup grant for prot
 | **Valyu** | **$10 one-time signup credit** |
 | **Perplexity** | No recurring Search API allowance documented on the pricing page reviewed |
 | **Parallel** | Site advertises recurring free credits and an allowance of up to 5,000 free requests/month; check the current account terms when benchmarking |
+| **Firecrawl** | **1,000 credits every month** (about 500 searches of up to 10 results), no card required |
 
 There are two different acquisition models here:
 
 ### Recurring developer allowance
 
-Webz.io, Exa, Brave, Tavily, and Parallel currently advertise some form of recurring free usage. This is useful for:
+Webz.io, Exa, Brave, Tavily, Parallel, and Firecrawl currently advertise some form of recurring free usage. This is useful for:
 
 - hobby projects;
 - low-volume agents;
@@ -780,6 +829,10 @@ Perplexity has good time, country, language, and domain controls and can provide
 ## Parallel
 
 Parallel can describe the goal in the `objective`, use concise lexical queries, and steer source selection. It is flexible for an agent but relies much more on the objective/ranking stage than on a news-specific metadata schema.
+
+## Firecrawl
+
+Firecrawl can search the `news` source with `location` and return each result as full-page markdown in the same call; the docs say `tbs` time filtering does not apply to news results. Negative sentiment and source country are not filters, and domain exclusion is not documented for the news source, so those constraints would need query wording or post-processing of the returned text.
 
 ---
 
@@ -892,6 +945,18 @@ Best fit when the main requirement is:
 
 Main limitation for news intelligence: it is a general web retrieval service rather than a structured news product.
 
+## Firecrawl
+
+Best fit when the main requirement is:
+
+- news results plus the full page text in one request;
+- query-relevant highlights by default;
+- web and news results in one call;
+- up to 100 results per source type;
+- a recurring free allowance.
+
+Main limitation for news intelligence: news is a source over general search with basic metadata, no structured news filters, domain filters not documented for the news source, and dates returned as display strings.
+
 ---
 
 # 14. What a stronger contextual-news API should expose
@@ -986,13 +1051,13 @@ This matters because a contextual API is frequently adopted bottom-up: a develop
 |---|---|---|
 | Structured adverse-media search | **Webz.io** | Semantic query + deterministic negative-sentiment/category/country filters |
 | RAG over current news | **Webz.io, Exa, Tavily, You.com** | All return useful context; metadata depth and payload style differ |
-| General web + news grounding in one API | **You.com, Perplexity, Parallel** | Broad web orientation rather than dedicated news database |
+| General web + news grounding in one API | **You.com, Perplexity, Parallel, Firecrawl** | Broad web orientation rather than dedicated news database |
 | Dedicated conventional news search | **Brave, Webz.io** | Both expose news-specific search products |
-| Query-aware passages for an LLM | **Exa, You.com, Tavily, Webz.io, Parallel** | Each exposes passages/highlights/chunks/excerpts |
+| Query-aware passages for an LLM | **Exa, You.com, Tavily, Webz.io, Parallel, Firecrawl** | Each exposes passages/highlights/chunks/excerpts (Firecrawl: highlights on by default) |
 | Fine-grained relevance tuning | **Valyu** | Explicit score threshold, source biasing, ranking instructions |
 | High-volume low-cost generic AI search | **Parallel, Brave, You.com, Perplexity** | Aggressive flat/request pricing, depending workload |
 | News research requiring metadata constraints | **Webz.io** | Strongest combination here of semantic retrieval and structured news filters |
-| Small project that should remain free/very cheap over time | **Webz.io, Exa, Brave, Tavily, Parallel** | Recurring free usage is publicly advertised |
+| Small project that should remain free/very cheap over time | **Webz.io, Exa, Brave, Tavily, Parallel, Firecrawl** | Recurring free usage is publicly advertised |
 
 ---
 
@@ -1134,11 +1199,18 @@ That distinction affects filtering, metadata, monitoring workflows, historical a
 - Source policy: https://docs.parallel.ai/resources/source-policy
 - Pricing: https://parallel.ai/pricing
 
+## Firecrawl
+
+- Search guide: https://docs.firecrawl.dev/features/search
+- Search highlights: https://docs.firecrawl.dev/features/search-highlights
+- Search API reference: https://docs.firecrawl.dev/api-reference/endpoint/search
+- Pricing: https://www.firecrawl.dev/pricing
+
 ---
 
 ## Methodology and caveats
 
-This comparison is based on public vendor documentation and pricing pages reviewed on **August 21, 2026**. API capabilities, limits, free allowances, and prices can change.
+This comparison is based on public vendor documentation and pricing pages reviewed on **August 21, 2026**. The Firecrawl entries were reviewed on **October 9, 2026**. API capabilities, limits, free allowances, and prices can change.
 
 The comparison intentionally distinguishes between:
 
